@@ -27,9 +27,9 @@ logger = logging.getLogger(__name__)
 
 # Methods
 
-def vector_normal_to_plane(plane_points_pqr):
+def normal_vector_of_plane(plane_points_pqr):
     """
-    Find the vector normal to the plane formed by the given points.
+    Find the vector that is normal to the plane formed by the given points.
 
         equation for the plane formed by points p,q, and r:
             a(x - px) + b(y - py) + c(z - pz) = 0
@@ -211,3 +211,11 @@ def regression_line_coefficients_from_data_points(xs, ys):
     p = [slope, intercept]
 
     return p
+
+
+r1_direction = np.array([1,1,1])
+r1_point = np.array([-1,-1,-1])
+r2_direction = np.array([-1,-1,1])
+r2_point = np.array([1,1,-1])
+
+print(closest_point_between_two_rays(r1_direction, r1_point, r2_direction, r2_point))
