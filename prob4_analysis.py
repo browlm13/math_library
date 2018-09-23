@@ -8,8 +8,6 @@
 
 		Comparisons of aitken acceleration and non aitken acceleration methods for solving x*.
 
-		a) g(x) = (1/4)x^2 + (-1/2)x -1,  x0 = 2
-
 		plot analysis of y = g(x) vesus y = x
 	
 	L.J. Brown
@@ -63,7 +61,7 @@ def get_iteration_display_points(Gfun, x0, num_iters):
 	return xs, ys, guesses
 
 
-def analysis_plot(fixed_point_functions, order, domain, num_points=300):
+def analysis_plot(fixed_point_functions, order, domain, num_fixed_point_iterations=8, num_points=300):
 
 	import matplotlib.pylab as plt
 	import matplotlib.colors as colors
@@ -100,10 +98,8 @@ def analysis_plot(fixed_point_functions, order, domain, num_points=300):
 		axs[i].set_aspect('equal') # equal
 		axs[i].set_ylim([domain[0],domain[1]]) # set y lim
 
-		# display root finding iterations
-		num_iteration = 8
-
-		xs, ys, guesses = get_iteration_display_points(Gfun, x0, num_iteration)
+		# display fixed point finding iterations
+		xs, ys, guesses = get_iteration_display_points(Gfun, x0, num_fixed_point_iterations)
 		axs[i].plot(xs, ys, color='m', marker=None, label='fixed point iteration', linestyle='dashed', linewidth=0.5)
 	
 		cm = plt.get_cmap("hot") 
@@ -163,7 +159,12 @@ if "__main__" in __name__:
 				}
 	}
 
+	# plot fixed point iterations
 	order = ['a', 'b', 'c', 'd']
+	domain = (-2,2)
+	num_fixed_point_iterations = 10
+	analysis_plot(fixed_point_functions, order, domain, num_fixed_point_iterations)
+
 
 	# For all problems use an absolute solution tolerance of 10−5, 
 	# a relative solution tolerance of 10−10, 
@@ -171,10 +172,6 @@ if "__main__" in __name__:
 	maxit = 100
 	atol = 10**(-5)
 	rtol = 10**(-10)
-
-	domain = (-2,2)
-	#analysis_plot(fixed_point_functions, domain)
-	analysis_plot(fixed_point_functions, order, domain)
 
 	# interp_representation_error
 	#interp_representation_error = lambda Gfun, x_final: abs(Gfun(x_final) - x_final)
