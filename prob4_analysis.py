@@ -101,23 +101,27 @@ def analysis_plot(fixed_point_functions, order, domain, num_points=300):
 		axs[i].set_ylim([domain[0],domain[1]]) # set y lim
 
 		# display root finding iterations
-		num_iteration = 4
-		color = 'k'
-		marker = '.'
-		style = "dashed" # line style
-		width = 0.3 # line width
-		color_map_style = 'hot'
+		num_iteration = 8
 
 		xs, ys, guesses = get_iteration_display_points(Gfun, x0, num_iteration)
-		format_str = "{color}{marker}-".format(color=color, marker=marker)
-		axs[i].plot(xs, ys, format_str, label='fixed point iteration', linestyle=style, linewidth=width)
-
-		cm = plt.get_cmap(color_map_style) 
-		cNorm = colors.Normalize(vmin=0, vmax=len(guesses)-1)
+		axs[i].plot(xs, ys, color='m', marker=None, label='fixed point iteration', linestyle='dashed', linewidth=0.5)
+	
+		cm = plt.get_cmap("hot") 
+		cNorm = colors.Normalize(vmin=0, vmax=len(guesses))
 		scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
 		for idx,g in enumerate(guesses):
 			colorVal = scalarMap.to_rgba(idx)
-			axs[i].plot([g],0, marker='x', color=colorVal)
+			alpha=1 #1/(idx+1)
+			markersize= 20/(idx+1)
+			axs[i].plot(g,0, marker='x', color=colorVal, alpha=alpha,markersize=markersize)
+
+		cNorm = colors.Normalize(vmin=0, vmax=len(xs))
+		scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+		for idx in range(len(xs)):
+			colorVal = scalarMap.to_rgba(idx)
+			alpha=0.75 #1/(idx+1)
+			markersize= 10/(idx+1)
+			axs[i].plot(xs[idx],ys[idx], marker='.', color=colorVal, alpha=alpha, markersize=markersize)
 
 		# show legned
 		axs[i].legend(loc=9, bbox_to_anchor=(0.5, -0.2))
