@@ -45,8 +45,6 @@ class InteractivePolynomial(object):
         self.ax.set_ylim([self.domain[0][0],self.domain[1][1]]) # set y lim
         self.ax.legend(loc=9, bbox_to_anchor=(0.5, -0.2))
 
-
-        #xs, ys = poly_points(x,y, self.domain)
         xs, ys, self.f = self.poly_points()
         self.polynomial, = ax.plot(xs, ys, animated=True)
 
@@ -67,10 +65,12 @@ class InteractivePolynomial(object):
     def poly_points(self):
 
         x,y = self.get_verts()
-
+        
         # calculate polynomial
-        z = np.polyfit(x, y, len(x))
-        f = np.poly1d(z)
+        with np.testing.suppress_warnings() as sup:
+            sup.filter(np.RankWarning, "Polyfit may be poorly conditioned")
+            z = np.polyfit(x, y, len(x))
+            f = np.poly1d(z)
 
         # calculate new x's and y's
         m = 300 # number of points to plot on graph
