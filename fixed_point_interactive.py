@@ -49,8 +49,6 @@ def get_fp_iteration_display_points(Gfun, x0, maxits=6, atol=10**(-5), rtol=10**
 
 
 def poly_to_Gfun(p):
-    # Function to convert to root finding problem given f(x). 'f(x*) = 0' --> 'g(x*) = x*' 
-    #Gfun = lambda Ffun: lambda x: p(x) + x
     Gfun = poly(p.c)
     return Gfun
 
