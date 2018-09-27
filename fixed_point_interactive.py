@@ -3,9 +3,20 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 
+import matplotlib.colors as colors
+import matplotlib.cm as cmx
 import warnings
 
-def get_fp_iteration_display_points(Gfun, x0, atol, rtol, maxits):
+def poly(coeffs):
+  def calc(x):
+    result = 0
+    for i,c in enumerate(reversed(coeffs)):
+      result += c*(x**i)
+    return result
+  return calc
+
+
+def get_fp_iteration_display_points(Gfun, x0, maxits=6, atol=10**(-5), rtol=10**(-5)):
     # first iteration: xaxis (x0, 0) -> y=g (x0, Gfun(x0)) -> y=x (Gfun(x0), Gfun(x0)) -> 
     xs = [x0]
     ys = [0]
@@ -25,8 +36,8 @@ def get_fp_iteration_display_points(Gfun, x0, atol, rtol, maxits):
         xk2 = Gfun(xk0)
         yk2 = 0
 
-        xs += [xk0, xk1, xk2]
-        ys += [yk0, yk1, yk2]
+        xs += [xk0, xk1] #, xk2]
+        ys += [yk0, yk1] #, yk2]
 
         guesses += [xk2]
 
@@ -36,9 +47,11 @@ def get_fp_iteration_display_points(Gfun, x0, atol, rtol, maxits):
 
     return xs, ys, guesses, i+1, False #  return number of iterations and wether or not there was convergence
 
+
 def poly_to_Gfun(p):
     # Function to convert to root finding problem given f(x). 'f(x*) = 0' --> 'g(x*) = x*' 
-    Gfun = lambda Ffun: lambda x: x + p(x)
+    #Gfun = lambda Ffun: lambda x: p(x) + x
+    Gfun = poly(p.c)
     return Gfun
 
 Path = mpath.Path
@@ -62,6 +75,32 @@ ax.add_patch(patch)
 class InteractivePolynomial(object):
 
     epsilon = 25  # max pixel distance to count as a vertex hit
+
+    def plot_iterations(self, axsi, xs, ys, guesses, its, convergence):
+
+        axsi.plot(xs, ys, color='m', marker=None, linestyle='dashed', linewidth=0.5)
+
+
+        ylim = axsi.get_ylim()
+        #axsi.text(0, ylim[0],text, color=text_color, fontsize=8, ha='center', va='bottom', alpha=0.8)
+
+        cm = plt.get_cmap("hot") 
+        cNorm = colors.Normalize(vmin=0, vmax=len(guesses))
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+        for idx,g in enumerate(guesses):
+            colorVal = scalarMap.to_rgba(idx)
+            alpha=1 #1/(idx+1)
+            markersize= 20/(idx+1)
+            axsi.plot(g,0, marker='x', color=colorVal, alpha=alpha,markersize=markersize)
+
+        cNorm = colors.Normalize(vmin=0, vmax=len(xs))
+        scalarMap = cmx.ScalarMappable(norm=cNorm, cmap=cm)
+        for idx in range(len(xs)):
+            colorVal = scalarMap.to_rgba(idx)
+            alpha=0.75 #1/(idx+1)
+            markersize= 10/(idx+1)
+            axsi.plot(xs[idx],ys[idx], marker='.', color=colorVal, alpha=alpha, markersize=markersize)
+
 
     def __init__(self, pathpatch, domain):
 
@@ -118,6 +157,11 @@ class InteractivePolynomial(object):
         self.released = True
 
 
+        # fixed point plot
+        Gfun = poly_to_Gfun(self.f)
+        xs, ys, guesses, its, convergence = get_fp_iteration_display_points(Gfun, self.x0)
+        self.fixed_point_plot, = self.ax.plot(xs, ys, color='black', marker=None, linestyle='dashed', linewidth=1)
+
 
         canvas.mpl_connect('draw_event', self.draw_callback)
         canvas.mpl_connect('button_press_event', self.button_press_callback)
@@ -156,6 +200,7 @@ class InteractivePolynomial(object):
         self.ax.draw_artist(self.polynomial)
         self.ax.draw_artist(self.line)
         self.ax.draw_artist(self.initial_guess)
+        self.ax.draw_artist(self.fixed_point_plot)
         self.canvas.blit(self.ax.bbox)
 
 
@@ -258,8 +303,20 @@ class InteractivePolynomial(object):
 
             self.canvas.blit(self.ax.bbox)
 
+        # call fixed point iteration
+        self.canvas.restore_region(self.background)
+        self.ax.draw_artist(self.line)
+        self.ax.draw_artist(self.polynomial)
+        self.ax.draw_artist(self.initial_guess)
+        Gfun = poly_to_Gfun(self.f)
+        xs, ys, guesses, its, convergence = get_fp_iteration_display_points(Gfun, self.x0)
+        self.fixed_point_plot.set_data(xs, ys)
+        self.ax.draw_artist(self.fixed_point_plot)
+
+
+
 interactor = InteractivePolynomial(patch, domain)
-ax.set_title('drag points to update polynomial')
+ax.set_title('drag points to update fixed point iteration')
 ax.set_xlim(domain[0][0], domain[0][1])
 ax.set_ylim(domain[1][0], domain[1][1])
 
