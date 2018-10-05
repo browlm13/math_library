@@ -108,7 +108,7 @@ def hermite_coeffs(xs, ys, dys, output=True):
 
         Use Newtons Divded Diffrence Method, and return the coefficients, 
 
-            bs = b0, b1, ..., bn
+            bs = b0, b1, ..., b2n+1
 
         where,
 
@@ -328,22 +328,28 @@ def construct_hermite_interpolating_polynomial_modified_lagrange(x_values, y_val
         Returns a function for the constructed hermite polynomial interpolant.
     """
 
+    # define function for the constructed hermite polynomial interpolant
     def ph(x):
 
+        # initalize sum to 0
         result = 0
+
         for i in range(len(x_values)):
+
+            # get values ready
             yi, dyi = y_values[i], dy_values[i]
             Ai, Bi = construct_Ai(i, x_values), construct_Bi(i, x_values)
 
+            #sum of: f(xi)*Ai(x) + f'(xi)*Bi(x)
             result += yi*Ai(x) + dyi*Bi(x)
 
         return result
 
     return ph
 
-# construct Ai for hermite interpolation
 def construct_Ai(i, x_vals):
     """
+        Construct Ai for hermite interpolation
         Returns a function to evaluate Ai(x).
 
         Ai(x) = [1 - 2(x - xi)dli(xi)](li( x )**2)
@@ -352,14 +358,13 @@ def construct_Ai(i, x_vals):
     li = construct_lagrange_basis_polynomial(i,x_vals)
     dli = construct_lagrange_basis_polynomial_derivative(i, x_vals)
 
-    def Ai(x):
-        return (1 - 2*(x - xi)*dli(xi))*(li(x)**2)
+    def Ai(x): return ( 1 - 2*(x - xi)*dli(xi) ) * ( li(x)**2 )
 
     return Ai
 
-# construct Bi for hermite interpolation
 def construct_Bi(i, x_vals):
     """
+        Construct Bi for hermite interpolation
         Returns a function to evaluate Bi(x).
 
         Bi(x) = (x - xi)*(li(x)**2)
@@ -367,8 +372,7 @@ def construct_Bi(i, x_vals):
     xi = x_vals[i]
     li = construct_lagrange_basis_polynomial(i,x_vals)
 
-    def Bi(x):
-        return (x - xi)*(li(x)**2)
+    def Bi(x): return (x - xi)*(li(x)**2)
 
     return Bi
 
@@ -414,12 +418,11 @@ def construct_lagrange_basis_polynomial(i, x_vals):
 
 # construct_lagrange_basis_polynomial_derivative
 def construct_lagrange_basis_polynomial_derivative(i, x_vals):
-    """
-        Returns a function to evaluate the derivative of lagrange basis polynomial dli(x).
 
-        dli(x) = li(x)*( sum(1/(x - xi)) for i != j )
+    #    Returns a function to evaluate the derivative of lagrange basis polynomial dli(x).
 
-    """
+    #    dli(x) = li(x) * ( sum(1/(x - xi)) for i != j )
+
 
     xi = x_vals[i]
 
@@ -434,7 +437,7 @@ def construct_lagrange_basis_polynomial_derivative(i, x_vals):
     def dli(x):
 
         # for all j != i: 1/(x - xi)
-        multipliers = [1/(x - xi) for xi in used_x_vals]
+        multipliers = [1/(x - xm) for xm in used_x_vals]
         multiplier_result = reduce(lambda a, b: a*b, multipliers)
 
         return li(x)*multiplier_result

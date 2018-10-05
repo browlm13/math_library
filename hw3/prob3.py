@@ -61,9 +61,6 @@ if __name__ == "__main__":
     # allocate storage for hermite interpolant (evaluated using modified divided diffrence method)
     phdd = np.zeros(zvals.shape, dtype=float)
 
-    # allocate storage for hermite interpolant (evaluated using tmp method)
-    phtmp = np.zeros(zvals.shape, dtype=float)
-
     # run test for varying numbers of interpolation nodes
     for n in nvals:
         lagrange_nodes = np.linspace(-L, L, n+1)     # lagrange interpolation nodes 
@@ -79,9 +76,6 @@ if __name__ == "__main__":
         # evaluate interpolant hermite using modified divided diffrence method
         phdd = hermite(hermite_nodes, hermite_f_yvals, hermite_df_yvals, zvals, method='modified_divided_difference')
 
-        # evaluate interpolant hermite using modified lagrange method
-        phl = hermite(hermite_nodes, hermite_f_yvals, hermite_df_yvals, zvals, method='modified_lagrange')
-
         # generate comparison plots
         fig, axarr = plt.subplots(1,2)
 
@@ -93,15 +87,13 @@ if __name__ == "__main__":
 
         ltitle = '$p_L(z)$'
         htitle = '$p_H(z)$'
-        hltitle = '$p_H(z) (l)$'
         
-        fplot = axarr[0].plot(zvals, fvals, 'r--', label=ftitle)
+        fplot = axarr[0].plot(zvals, fvals, 'r-', label=ftitle)
 
-        lplot = axarr[0].plot(zvals, pl, 'b-', label=ltitle)
-        hplot = axarr[0].plot(zvals, phdd, 'g-', label=htitle)
-        #hlplot = axarr[0].plot(zvals, phl, 'y-', label=hltitle)
+        lplot = axarr[0].plot(zvals, pl, 'g--', label=ltitle)
+        hplot = axarr[0].plot(zvals, phdd, 'b--', label=htitle)
 
-        axarr[0].scatter(hermite_nodes,hermite_f_yvals,s=10,color='g', zorder=2)
+        axarr[0].scatter(hermite_nodes,hermite_f_yvals,s=10,color='b', zorder=2)
 
         axarr[0].set_xlabel('x')
         axarr[0].set_ylabel('y')
@@ -115,11 +107,9 @@ if __name__ == "__main__":
 
         l_error_title = '$ | f(z) - p_L(z) | $'
         h_error_title = '$ | f(z) - p_H(z) | $'
-        hl_error_title = '$ | f(z) - p_H(z) (l)| $'
 
-        lplot_error = axarr[1].plot(zvals, abs(fvals-pl), 'b-', label=l_error_title)
-        hplot_error = axarr[1].plot(zvals, abs(fvals-phdd), 'g-', label=h_error_title)
-        #hlplot_error = axarr[1].plot(zvals, abs(fvals-phl), 'y-', label=hl_error_title)
+        lplot_error = axarr[1].plot(zvals, abs(fvals-pl), 'g--', label=l_error_title)
+        hplot_error = axarr[1].plot(zvals, abs(fvals-phdd), 'b--', label=h_error_title)
 
         axarr[1].set_xlabel('x')
         axarr[1].set_ylabel('y')
