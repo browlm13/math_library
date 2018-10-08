@@ -117,18 +117,21 @@ if __name__ == '__main__':
 	# test
 	f = lambda t: np.arctan(2*(t**2))
 
-	t = np.array([-2,-1,0,1,2])
+		# general parameters
+	L = -3.0
+	n = 5
+	t = np.linspace(-L, L, 5)
 	y = f(t)
 	alpha = 1
 	beta = 3
 	
 	z = cubic_spline_coefficients(t,y,alpha,beta)
 
-		# general parameters
-	L = -3.0
-	nvals = [ 41, 21, 11, 5]            # polynomial degrees
-	xs = np.linspace(-L, L, 201)     # evaluation points
+	interpolation_ys = []
+	for x in t:
+		interpolation_ys.append(cubic_spline_evaluate(t,y,z,x))
 
+	xs = np.linspace(-L, L, 201)     # evaluation points
 	answers = []
 	for x in xs:
 		answers.append(cubic_spline_evaluate(t,y,z,x))
@@ -140,7 +143,8 @@ if __name__ == '__main__':
 	ftitle = '$f(z)$'
 	stitle = '$S(z)$'
 
-	axarr[0].scatter(t,y,s=10,color='b', zorder=2)
+	axarr[0].scatter(t,y,s=10,color='r', zorder=2)
+	axarr[0].scatter(t,interpolation_ys,s=10,color='g', zorder=2)
 
 	fplot = axarr[0].plot(xs, f(xs), 'r-', label=ftitle)
 	lplot = axarr[0].plot(xs, answers, 'g--', label=stitle)
