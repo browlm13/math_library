@@ -264,12 +264,119 @@ File name: cubic_spline.py
 				------------------------------------------------------------
 
 
+				--------------------------------------------------------------
+
+				Deriving the equation for S_i(x) on the interval [t_i, t_i+1].
+
+				--------------------------------------------------------------
+
+					S'' is continous at each interior knot, 
+				and S_i is a cubic polynomial on [t_i, t_i+1].
+
+					let S_i''(t_i) = z_i,
+					let h_i = t_i+1 - t_i
+
+				Then S_i''(x) is a linear function satisfying,
+
+					S_i''(t_i)   = z_i,
+					S_i''(t_i+1) = z_i+1
+
+				Then S_i''(x) is given by the straight line between z_i and z_i+1,
+
+							    z_i 			   z_i+1
+					S_i''(x) =  ---( t_i+1 -x )  + -----( x - t_i ) 
+							    h_i 				h_i
+
+				After integrating twice and imposing the interpolation conditions 
+				S_i(t_i) = y_i and S_i(t_i+1) = y_i+1 you get an equation for S_i(x),
+
+						------
+						eq (*):
+						------
+
+								     z_i 			        z_i+1
+						S_i(x) =  + ------( t_i+1 -x )^3  + ------( x - t_i )^3  +
+								     6*h_i 				     6*h_i
+
+								     [ 	y_i+1	 (z_i+1 * h_i) ]
+								   + | 	-----  -  -----------  |( x - t_i ) +
+									 [   h_i  		   6       ]
+
+									 [ 	 y_i	 (z_i * h_i) ]
+							  	   + | 	-----  - ----------- |( t_i+1 - x )
+									 [   h_i  		  6      ]
+
+
+				Once z_0, ..., z_n are found, eq (*) can be used in 
+				conjunction with the definition of S(x) to evaluate 
+				the cubic spline at any point.
+
+
+		Determine z_1, ..., z_n-1:
+
+			The continuity conditions for S' at the interior knots imply,
+
+				S_i-1'(t_i) = S_i'(t_i)
+
+			S_i'(x) can be obtained by differentiating eq (*), 
+			after substituting x=t_i the simplified equation for S_i'(t_i) becomes,
+
+					     	         h_i			      h_i        y_i       y_i+1
+				S_i'(t_i) =  - (z_i) -----    - (z_i+1)  -----    - -----    + -----
+						              3  				   6 		 h_i 		h_i
+
+			Similarily for S_i-1'(t_i),
+
+
+		     	       				    h_i-1			 h_i-1       y_i-1         y_i
+				S_i-1'(t_i) =   (z_i-1) -----    + (z_i) -----    - -------    + ------
+						                  6  			   3 	     h_i-1 		  h_i-1
+
+			Setting these two equations equal to one another and the result can be written as,
+
+
+																	6					 6
+			(h_i-1)(z_i-1) + 2(h_i + h_i-1)(z_i) + (h_i)(z_i+1) = ----(y_i+1 - y_i)  - -----(y_i - y_i-1)   eq($)
+																   h_i 				   h_i-1
+
+			let, 
+				u_i = 2(h_i + h_i-1),
+				b_i = [ 6*(y_i+1 - y_i) ]/(h_i),
+				v_i = b_i - b_i-1
+
+			then eq ($) becomes,
+
+			    (h_i-1)(z_i-1) + (u_i)(z_i) + (h_i)(z_i+1) = v_i,     for i = 1, ..., n-1
+
+			    or,
+
+			    	< h_i-1,  u_i,  h_i >  dot  < z_i-1,  z_i,  z_i+1 >  =  v_i
+
+			written as a system of equations,
+
+
+				C is an (n-1) x (n-1) tridagonal matrix,
+
+				C z_c = v_c
+
+
+				|u1 h1 						   | |  z1   |     |  v1   |
+				|h1 u2 h2 					   | |  z2   |     |  v2   |
+				|   h2 u3 h3  				   | |  z3   |     |  v3   |
+				|       ... 				   | |   .   |     |  .    |
+				|         ...  				   | |   .   |  =  |  .    |
+				|           ...  			   | |   .   |     |  .    |
+				|            h_n-3 u_n-2 h_n-2 | | z_n-2 |     | v_n-2 |
+				|                  h_n-2 u_n-1 | | z_n-1 |     | v_n-1 |
 
 
 
 
+			This equation is used only for i = 1, ..., n-1, giving a system of n-1 
+			linear equations for the n+1 unkown z_0, ..., z_n. 
 
-
+			z_0 and z_n can be selected arbitrarily because of the two 
+			degrees of freedom at your disposal.
 
 
 
