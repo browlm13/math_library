@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # general parameters
     L = 3.0
     nvals = [ 41, 21, 11, 5]            # polynomial degrees
-    zvals = np.linspace(-L, L, 400)     # evaluation points
+    zvals = np.linspace(-L, L, 800)     # evaluation points
 
     #
     # test problem 1 
@@ -74,14 +74,19 @@ if __name__ == "__main__":
 
     # run test for varying numbers of interpolation nodes
     for n in nvals:
+
+        # evaluation at the nodes
         lagrange_nodes = np.linspace(-L, L, n+1)     # lagrange interpolation nodes 
         lagrange_f_yvals = f(lagrange_nodes)         # function values
 
+        # evaluation at the nodes
         hermite_nodes = np.linspace(-L, L, int((n+1)//2)) 
         hermite_f_yvals = f(hermite_nodes)
         hermite_df_yvals = df(hermite_nodes)
 
-        cubic_spline_nodes = np.linspace(-L, L, n+1)
+        # evaluation at the nodes
+        #cubic_spline_nodes = np.linspace(-L, L, n+1)
+        cubic_spline_nodes = np.linspace(-L, L, n)
         alpha = df(zvals[0])
         beta = ddf(zvals[-1])
         z_coefs = cubic_spline_coefficients(cubic_spline_nodes,f(cubic_spline_nodes),alpha,beta)
@@ -89,21 +94,6 @@ if __name__ == "__main__":
         for t in cubic_spline_nodes:
             yhat = cubic_spline_evaluate(cubic_spline_nodes,f(cubic_spline_nodes),z_coefs,t)
             cubic_spline_f_yvals.append(yhat)
-
-        """
-        cubic_spline_interpolation_ys = []
-        for x in t:
-            interpolated_y = cubic_spline_evaluate(t,y,z,x)
-            interpolation_ys.append(interpolated_y)
-        """
-        """
-        #xs = np.linspace(-L, L, 400)     # evaluation points
-        yhats = []
-        for x in xs:
-            yhat = cubic_spline_evaluate(t,y,z,x)
-            yhats.append(yhat)
-        """
-
 
         # evaluate interpolant lagrange
         pl = lagrange(lagrange_nodes, lagrange_f_yvals, zvals)
@@ -116,6 +106,7 @@ if __name__ == "__main__":
         for t in zvals:
             yhat = cubic_spline_evaluate(cubic_spline_nodes,f(cubic_spline_nodes),z_coefs,t)
             cs.append(yhat)
+
 
         # generate comparison plots
         fig, axarr = plt.subplots(1,2)

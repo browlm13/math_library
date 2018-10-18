@@ -431,14 +431,14 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 					r is a vector of length n+1
 
 			|2h0 h0     						   | |  z0   |     | b0 -6*alpha |
-			|    u1 h1 						   	   | |  z1   |     |  v1   		 |
+			| h0 u1 h1 						   	   | |  z1   |     |  v1   		 |
 			|    h1 u2 h2 					   	   | |  z2   |     |  v2   		 |
 			|       h2 u3 h3  				       | |  z3   |     |  v3   		 |
 			|          ... 				           | |   .   |     |  .    		 |
 			|             ...  				       | |   .   |  =  |  .    		 |
 			|              ...  			       | |   .   |     |  .    		 |
-			|                h_n-3 u_n-2 h_n-2     | | z_n-2 |     | v_n-2 		 |
-			|                      h_n-2 u_n-1     | | z_n-1 |     | v_n-1 		 |
+			|               h_n-3 u_n-2 h_n-2      | | z_n-2 |     | v_n-2 		 |
+			|                     h_n-2 u_n-1 h_n-1| | z_n-1 |     | v_n-1 		 |
 			|           						1  | | z_n   |     | beta  		 |
 
 			where,
@@ -452,8 +452,12 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 				S'(t_0) = alpha
 				2*h_0 * (z_0) + h_0 * (z_1) = b_0 -6 * alpha
 
+				row 0: |2h0 h0     						   | |  z0   |   =  | b0 -6*alpha |
+
 				S''(t_n) = beta
 				(z_n) = beta
+
+				row n: |           						1  | | z_n   |   =  | beta |
 
 		:param t: numpy array of nodes first element.
 		:param y: numpy array of nodes second emelemnt ( true function evalutated at t, f(t))
@@ -487,30 +491,6 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 	# first element in r: 
 	r[0] = b(0) -6 * alpha
 
-	# A row 1:   [0, u1, h1, 0, ..., 0]
-	A[1,1], A[1,2] = u(1), h(1)
-
-	# r second element:
-	r[1] = v(1)
-
-	# fill in equations for intererior nodes rows 2->n-2
-	for i in range(2,n-1):
-
-		# fill tridagonal system
-		A[i, i-1] = h(i-1)
-		A[i, i] = u(i)
-		A[i, i+1] = h(i)
-
-		# fill result vector neglecting first 2 and last 2 elements
-		r[i] = v(i)
-
-	# A row n-1: [0, ..., hn-2, un-1, 0]
-	A[n-1,n-2], A[n-1,n-1] = h(n-2), u(n-1)
-
-	# second to last element in r:
-	r[n-1] = v(n-1)
-
-	"""
 	# fill in equations for intererior nodes rows 1->n-1
 	for i in range(1,n):
 
@@ -521,7 +501,7 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 
 		# fill result vector neglecting first 2 and last 2 elements
 		r[i] = v(i)
-	"""
+	
 
 	# A row n:   [0, ..., 1]
 	A[n,n] = 1
@@ -562,6 +542,11 @@ def cubic_spline_evaluate(t, y, z, x):
 			  	   + | 	-----  - ----------- |( t_i+1 - x )
 					 [   h_i  		  6      ]
 
+	:param t: numpy array of n+1 values
+	:param y: numpy array of n+1 values of the function to interpolate evaluated at the points t.
+	:param z: numpy array of n+1 coefficients for evaluating cubic spline, or second derivatives at the knots.
+	:param x: float, point to evaluate cubic spline at.
+	:returns: float. Cubic spline evaluated at x.
 
 	"""
 
@@ -582,8 +567,8 @@ def cubic_spline_evaluate(t, y, z, x):
 		return term1 + term2 + term3 + term4
 
 	# evaluate using polynomial in correct interval
-	for i in range(0, n):
-		if x <= t[i]: return S(i,x)
+	for i in range(1, n):
+		if x < t[i]: return S(i-1,x)
 	return S(n-1, x)
 
 
