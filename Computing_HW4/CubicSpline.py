@@ -3,148 +3,148 @@
 """
 File name: CubicSpline.py
 
-    Python Version: 3.6
+	Python Version: 3.6
 
-    	==========================
-    	Cubic Spline Interpolation.
-    	==========================
+		==========================
+		Cubic Spline Interpolation.
+		==========================
 
-    		----------------------------------------
+			----------------------------------------
 
-    			'n+1' data points to interpolate:
+				'n+1' data points to interpolate:
 
-    		----------------------------------------
+			----------------------------------------
 
-    			Given numpy arrays t and y:
+				Given numpy arrays t and y:
 
-    			 	t = [t_0, ..., t_n] ~ 'knots', n+1 data points (paramater 1)
-    			 	y = [y_0, ..., y_n] ~ 'f(t)',  n+1 data points (parameter 2)
+					t = [t_0, ..., t_n] ~ 'knots', n+1 data points (paramater 1)
+					y = [y_0, ..., y_n] ~ 'f(t)',  n+1 data points (parameter 2)
 
-    			 		* where y_i = f(t_i)
+						* where y_i = f(t_i)
 
-    			 					Table:
-    			 					------
+									Table:
+									------
 
-		    		t ||  t_0   |  t_1   |  ...  |  t_n   |  
-		    		---------------------------------------
-		    		y || f(t_0) | f(t_1) |  ...  | f(t_n) | 
+					t ||  t_0   |  t_1   |  ...  |  t_n   |  
+					---------------------------------------
+					y || f(t_0) | f(t_1) |  ...  | f(t_n) | 
 
-    		------------------------------------------------------------------
+			------------------------------------------------------------------
 
-    			Defining the interpolating spline function S of degree k,
-    			using 'n' polynomials (S_0, ..., S_n-1) of at most degree k
+				Defining the interpolating spline function S of degree k,
+				using 'n' polynomials (S_0, ..., S_n-1) of at most degree k
 
-    					* where k = 3 for the cubic spline S
+						* where k = 3 for the cubic spline S
 
-    		------------------------------------------------------------------
+			------------------------------------------------------------------
 
-    		    	The 'n+1' data points are interpolated using 'n' cubic 
-    		    splines (S_0, ..., S_n-1). Let S be the cubic spline function 
-    		    constructed to interpolate the table data above.
+					The 'n+1' data points are interpolated using 'n' cubic 
+				splines (S_0, ..., S_n-1). Let S be the cubic spline function 
+				constructed to interpolate the table data above.
 
-    				On each of the n subintervals: [t_0, t_1], [t_1, t_2], ..., [t_n-1, t_n], 
-    			let S_i be the cubic polynomial that represents S on [t_i, t_i+1].
+					On each of the n subintervals: [t_0, t_1], [t_1, t_2], ..., [t_n-1, t_n], 
+				let S_i be the cubic polynomial that represents S on [t_i, t_i+1].
 
-	    			* S ~  
-    				   		Spline function of degree '3'.
-    				   S is a peicewise polynomial that interpolates 
-    				   all 'n+1' data points. 
+					* S ~  
+							Spline function of degree '3'.
+					   S is a peicewise polynomial that interpolates 
+					   all 'n+1' data points. 
 
-	    			* S_0, ..., S_n-1 ~ 
+					* S_0, ..., S_n-1 ~ 
 
-					    	'n' polynomials of at most degree '3' 
-					    that together form the interpolting cubic spline S. 
-					    Each of the n cubic polynomials has k+1 = 4 coefficients,
-					    a_i0, ..., a_i3,
+							'n' polynomials of at most degree '3' 
+						that together form the interpolting cubic spline S. 
+						Each of the n cubic polynomials has k+1 = 4 coefficients,
+						a_i0, ..., a_i3,
 
-					   	S_i =  (a_i0)  +(a_i1)*(x)  +(a_i2)*(x^2)  +(a_i3)*(x^3)
+						S_i =  (a_i0)  +(a_i1)*(x)  +(a_i2)*(x^2)  +(a_i3)*(x^3)
 
 
-		    					{  
-		    					   S_0( x )   	for x in [t_0, t_1),
-		    				       S_1( x )   	for x in [t_1, t_2),
+								{  
+								   S_0( x )   	for x in [t_0, t_1),
+								   S_1( x )   	for x in [t_1, t_2),
 
 					S( x ) =	   .
-							 	   .
+								   .
 								   .
 
-		    					   S_n-1( x ) 	for x in [t_n-1, t_n]  
-		    					}
+								   S_n-1( x ) 	for x in [t_n-1, t_n]  
+								}
 
-		    			* S has a total of '4n' coefficients, 4 from each of 
-		    			the n polynomials that form S.
+						* S has a total of '4n' coefficients, 4 from each of 
+						the n polynomials that form S.
 
-		    			* (k+1)n coefficients in general
+						* (k+1)n coefficients in general
 
-		    	------------------------------------------------------------------------
+				------------------------------------------------------------------------
 
-		    		Our goals:
+					Our goals:
 
-		    		1) Interpolation Condition:
+					1) Interpolation Condition:
 					   Construct S to interpolate all n+1 datapoints
 
-					   			S(t_i) = y_i, for all t_i
+								S(t_i) = y_i, for all t_i
 
-		    		2) Continuity Conditions:
+					2) Continuity Conditions:
 					   Construct S to have continous derivatives of all orders up k-1
 
-		    				denoted,
-		    						 " S in C^k-1 "
+							denoted,
+									 " S in C^k-1 "
 
-		    	-------------------------------------------------------------------------
+				-------------------------------------------------------------------------
 
-		    		---------------------------
-		    		1) Interpolation Condition:
+					---------------------------
+					1) Interpolation Condition:
 					---------------------------
 					- - - - - - - - - - - - - - - - - - - - - 
-			    	Condition 0 : S(t_i) = y_i for all t_i :
-			    	- - - - - - - - - - - - - - - - - - - - - 
+					Condition 0 : S(t_i) = y_i for all t_i :
+					- - - - - - - - - - - - - - - - - - - - - 
 
 				   To construct S so that it interpolate all n+1 data points we 
 				   assign the constraint,
 
-	    				S(t_i) = y_i for all t_i
+						S(t_i) = y_i for all t_i
 
-	    			There are 2 interpolation conditions on 
-	    			each of the 'n' subinterval,
+					There are 2 interpolation conditions on 
+					each of the 'n' subinterval,
 							
 							S(t_i) = y_i,
 							S(t_i+1) = y_i+1
 
 					* This gives rise to '2n' constraints.
 
-    				--------------------------------------------
-		    		2) Continuity Conditions (Conditions 1,2,3):
+					--------------------------------------------
+					2) Continuity Conditions (Conditions 1,2,3):
 					--------------------------------------------
 
-		    			To construct a cubic spline S so that,
+						To construct a cubic spline S so that,
 
-		    							S in C^2 
+										S in C^2 
 
-			    				( k-1 = 2 so S must have continous 
-				    				derivatives of all orders up to 2 )
+								( k-1 = 2 so S must have continous 
+									derivatives of all orders up to 2 )
 
 						we must satisfy 3 conditions:
 
-		    			(Condition 1) : 
+						(Condition 1) : 
 
-		    					S in C^0, 
-		    					" S must be continous "
+								S in C^0, 
+								" S must be continous "
 
-		    			(Condition 2) : 
+						(Condition 2) : 
 
-		    					S in C^1, 
-		    					" S's first derivative, S', must be continous "
+								S in C^1, 
+								" S's first derivative, S', must be continous "
 
-		    			(Condition 3) : 
+						(Condition 3) : 
 
-		    					S in C^2, 
-		    					" S's second derivative, S'', must be continous "
+								S in C^2, 
+								" S's second derivative, S'', must be continous "
 
 
-		    		- - - - - - - - - - - - - 
-		    		 Condition 1 - S in C^0 :
-		    		- - - - - - - - - - - - - 
+					- - - - - - - - - - - - - 
+					 Condition 1 - S in C^0 :
+					- - - - - - - - - - - - - 
 
 						The polynomials making up S are all continous on the 
 					subintervals they are defined, 
@@ -154,22 +154,22 @@ File name: CubicSpline.py
 						So we will focus on the interior knots, t_1, ..., t_n-1. If S is continous here then 
 					Condition 1 will be met.
 
-	    				The polynomials S_i-1 and S_i interpolate the 
-	    			same value y_i at the point t_i making S continous at all n-1 interior knots,
-	    		
-	    							S_i-1( t_i ) = y_i = S_i( t_i )   eq (2)
+						The polynomials S_i-1 and S_i interpolate the 
+					same value y_i at the point t_i making S continous at all n-1 interior knots,
+				
+									S_i-1( t_i ) = y_i = S_i( t_i )   eq (2)
 
-	    			Then S is continous by eq (2) above. 
+					Then S is continous by eq (2) above. 
 
-	    							S in C^0 ~ (Condition 1 met) 
+									S in C^0 ~ (Condition 1 met) 
 
 					* This continuity does not give rise to any 
 					additional constraints because it has already 
 					been counted in Conition 0 (the interpolation condition)
 
-		    		- - - - - - - - - - - - - 
-		    		 Condition 2 - S in C^1 :
-		    		- - - - - - - - - - - - - 
+					- - - - - - - - - - - - - 
+					 Condition 2 - S in C^1 :
+					- - - - - - - - - - - - - 
 
 						The first derivatives of the polynomials making up S are all continous on the open
 					subintervals they are defined because they are degree 3 polynomials,
@@ -185,9 +185,9 @@ File name: CubicSpline.py
 
 					* This gives an additional 'n-1' constraints
 
-		    		- - - - - - - - - - - - - 
-		    		 Condition 3 - S in C^2 :
-		    		- - - - - - - - - - - - - 
+					- - - - - - - - - - - - - 
+					 Condition 3 - S in C^2 :
+					- - - - - - - - - - - - - 
 
 						The second derivatives of the polynomials making up S are also all continous 
 					on the open subintervals they are defined because they are degree 3 polynomials,
@@ -240,7 +240,7 @@ File name: CubicSpline.py
 
 							* 2n + (k-1)*(n-1) total constraints
 
-								 	n-1 additional conditions are added 
+									n-1 additional conditions are added 
 									each time k increments, 
 									(1 for each interior knot) 
 									k-1 times so S in C^k-1
@@ -283,9 +283,9 @@ File name: CubicSpline.py
 
 				Then S_i''(x) is given by the straight line between z_i and z_i+1,
 
-							    z_i 			   z_i+1
+								z_i 			   z_i+1
 					S_i''(x) =  ---( t_i+1 -x )  + -----( x - t_i ) 
-							    h_i 				h_i
+								h_i 				h_i
 
 				After integrating twice and imposing the interpolation conditions 
 				S_i(t_i) = y_i and S_i(t_i+1) = y_i+1 you get an equation for S_i(x),
@@ -294,16 +294,16 @@ File name: CubicSpline.py
 						eq (*):
 						------
 
-								     z_i 			        z_i+1
+									 z_i 			        z_i+1
 						S_i(x) =  + ------( t_i+1 -x )^3  + ------( x - t_i )^3  +
-								     6*h_i 				     6*h_i
+									 6*h_i 				     6*h_i
 
-								     [ 	y_i+1	 (z_i+1 * h_i) ]
+									 [ 	y_i+1	 (z_i+1 * h_i) ]
 								   + | 	-----  -  -----------  |( x - t_i ) +
 									 [   h_i  		   6       ]
 
 									 [ 	 y_i	 (z_i * h_i) ]
-							  	   + | 	-----  - ----------- |( t_i+1 - x )
+								   + | 	-----  - ----------- |( t_i+1 - x )
 									 [   h_i  		  6      ]
 
 
@@ -321,16 +321,16 @@ File name: CubicSpline.py
 			S_i'(x) can be obtained by differentiating eq (*), 
 			after substituting x=t_i the simplified equation for S_i'(t_i) becomes,
 
-					     	         h_i			      h_i        y_i       y_i+1
+									 h_i			      h_i        y_i       y_i+1
 				S_i'(t_i) =  - (z_i) -----    - (z_i+1)  -----    - -----    + -----
-						              3  				   6 		 h_i 		h_i
+									  3  				   6 		 h_i 		h_i
 
 			Similarily for S_i-1'(t_i),
 
 
-		     	       				    h_i-1			 h_i-1       y_i-1         y_i
+										h_i-1			 h_i-1       y_i-1         y_i
 				S_i-1'(t_i) =   (z_i-1) -----    + (z_i) -----    - -------    + ------
-						                  6  			   3 	     h_i-1 		  h_i-1
+										  6  			   3 	     h_i-1 		  h_i-1
 
 			Setting these two equations equal to one another and the result can be written as,
 
@@ -346,11 +346,11 @@ File name: CubicSpline.py
 
 			then eq ($) becomes,
 
-			    (h_i-1)(z_i-1) + (u_i)(z_i) + (h_i)(z_i+1) = v_i,     for i = 1, ..., n-1
+				(h_i-1)(z_i-1) + (u_i)(z_i) + (h_i)(z_i+1) = v_i,     for i = 1, ..., n-1
 
-			    or,
+				or,
 
-			    	< h_i-1,  u_i,  h_i >  dot  < z_i-1,  z_i,  z_i+1 >  =  v_i
+					< h_i-1,  u_i,  h_i >  dot  < z_i-1,  z_i,  z_i+1 >  =  v_i
 
 			written as a system of equations,
 
@@ -381,98 +381,98 @@ File name: CubicSpline.py
 
 		   Boundary conditions (2.0):
 
-		   	start_bc = (deriv_order, deriv_value)
-		   	end_bc = (deriv_order, deriv_value)
+			start_bc = (deriv_order, deriv_value)
+			end_bc = (deriv_order, deriv_value)
 
-		   	deriv_order ~ derivative order, 1 or 2
-		   	deriv_value ~ value of derivative
+			deriv_order ~ derivative order, 1 or 2
+			deriv_value ~ value of derivative
 
-		   	#
-		   	# start_bc
-		   	#
+			#
+			# start_bc
+			#
 
-		   	if deriv_order == 1:
-		   		S'(t_0) = deriv_value
+			if deriv_order == 1:
+				S'(t_0) = deriv_value
 
-		   		2*h_0 * (z_0) + h_0 * (z_1) = b_0 -6 * deriv_value
+				2*h_0 * (z_0) + h_0 * (z_1) = b_0 -6 * deriv_value
 
-		   		or first row of matrix A becomes:
+				or first row of matrix A becomes:
 
-		   			A[0,:] = [2*h_0, h_0, 0, ..., 0] 
+					A[0,:] = [2*h_0, h_0, 0, ..., 0] 
 
-		   		and first element of vector r becomes:
+				and first element of vector r becomes:
 
-		   			r[0] = b_0 -6 * deriv_value
+					r[0] = b_0 -6 * deriv_value
 
-		   	if deriv_order == 2:
-		   		S''(t_0) = deriv_value
+			if deriv_order == 2:
+				S''(t_0) = deriv_value
 
-		   		(z_0) = deriv_value
+				(z_0) = deriv_value
 
-		   		or first row of matrix A becomes:
+				or first row of matrix A becomes:
 
-		   			A[0,:] = [1, 0, ..., 0] 
+					A[0,:] = [1, 0, ..., 0] 
 
-		   		and first element of vector r becomes:
+				and first element of vector r becomes:
 
-		   			r[0] = deriv_value
+					r[0] = deriv_value
 
 		   #
 		   # end_bc
 		   #
 
-		   	if deriv_order == 1:
-		   		S'(t_n) = deriv_value
+			if deriv_order == 1:
+				S'(t_n) = deriv_value
 
-		   		2*h_n-1 * (z_n-1) + h_n-1 * (z_n) = b_n-1 -6 * deriv_value
+				2*h_n-1 * (z_n-1) + h_n-1 * (z_n) = b_n-1 -6 * deriv_value
 
-		   		or last row of matrix A becomes:
+				or last row of matrix A becomes:
 
-		   			A[n,:] = [0, ..., 0, 2*h_n-1, h_n-1] 
+					A[n,:] = [0, ..., 0, 2*h_n-1, h_n-1] 
 
-		   		and first element of vector r becomes:
+				and first element of vector r becomes:
 
-		   			r[n] = b_n-1 -6 * deriv_value
+					r[n] = b_n-1 -6 * deriv_value
 
-		   	if deriv_order == 2:
-		   		S''(t_n) = deriv_value
+			if deriv_order == 2:
+				S''(t_n) = deriv_value
 
-		   		(z_n) = deriv_value
+				(z_n) = deriv_value
 
-		   		or last row of matrix A becomes:
+				or last row of matrix A becomes:
 
-		   			A[n,:] = [0, ..., 0, 1] 
+					A[n,:] = [0, ..., 0, 1] 
 
-		   		and last element of vector r becomes:
+				and last element of vector r becomes:
 
-		   			r[n] = deriv_value
-
-
-		   	----------
-		   	HW Problem:
-		   	-----------
-
-		   	The given boundry conditions for problem 3 become:
-
-    		S'(t_0) = alpha
-    		S''(t_n) = beta
-
-    		start_bc = (1, alpha)
-		   	end_bc = (2, beta)
+					r[n] = deriv_value
 
 
-    		1.) 2*h_0 * (z_0) + h_0 * (z_1) = b_0 -6 * alpha
+			----------
+			HW Problem:
+			-----------
+
+			The given boundry conditions for problem 3 become:
+
+			S'(t_0) = alpha
+			S''(t_n) = beta
+
+			start_bc = (1, alpha)
+			end_bc = (2, beta)
+
+
+			1.) 2*h_0 * (z_0) + h_0 * (z_1) = b_0 -6 * alpha
 
 				first row:
 
 					[2*h_0,  h_0, 0, ..., 0 ] * [z_0, z_1, ..., z_n].T = [ (b_0 -6*alpha), v_1, ..., v_n-1, beta]
 
-    		2.) (z_n) = beta
+			2.) (z_n) = beta
 
 				last row:
 
 					[0, ..., 1] * [z_0, ..., z_n].T  = [ (b_0 -6*alpha), v_1, ..., v_n-1, beta]
-    		
+			
 
 LJ Brown
 Fall 2018
@@ -525,7 +525,6 @@ class CubicSpline:
 	"""
 
 	def __init__(self, t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
-
 		self.t = t
 		self.y = y 
 		self.start_bc = start_bc
@@ -534,10 +533,29 @@ class CubicSpline:
 		# calculate coefficients
 		self.z = cubic_spline_coefficients_bc(self.t, self.y, start_bc=self.start_bc, end_bc=self.end_bc)
 
-	def __call__(self, xs):
+		n = len(self.t)
+		self.degree = n
 
+		self.latex_title = self.get_latex_title()
+		self.latex_error_title = self.get_latex_error_title()
+
+	def __call__(self, xs):
 		yhats = cubic_spline_evaluate(self.t, self.y, self.z, xs)
 		return yhats
+
+	@staticmethod
+	def num_nodes_given_degree(degree):
+		return degree
+
+	@staticmethod
+	def get_latex_title():
+		title = '$Spline_{3}(x)$'
+		return title
+		
+	@staticmethod
+	def get_latex_error_title():
+		error_title = '$ | f(x) - Spline_{3}(x) | $'
+		return error_title
 
 
 def cubic_spline_coefficients_bc(t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
@@ -556,10 +574,10 @@ def cubic_spline_coefficients_bc(t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
 			Boundry conditions,
 
 			start_bc = (deriv_order, deriv_value)
-		   	end_bc = (deriv_order, deriv_value)
+			end_bc = (deriv_order, deriv_value)
 
-		   	deriv_order ~ derivative order, 1 or 2
-		   	deriv_value ~ value of derivative
+			deriv_order ~ derivative order, 1 or 2
+			deriv_value ~ value of derivative
 
 			#
 			# first row determined by start_bc (starting boundry conditions)
@@ -701,10 +719,10 @@ def cubic_spline_evaluate(t, y, z, xs):
 
 				{  
 				   S_0( x )   	for x in [t_0, t_1),
-			       S_1( x )   	for x in [t_1, t_2),
+				   S_1( x )   	for x in [t_1, t_2),
 
 	S( x ) =	   .
-			 	   .
+				   .
 				   .
 
 				   S_n-1( x ) 	for x in [t_n-1, t_n]  
@@ -712,16 +730,16 @@ def cubic_spline_evaluate(t, y, z, xs):
 
 	where S_i is defined,
 
-				     z_i 			        z_i+1
+					 z_i 			        z_i+1
 		S_i(x) =  + ------( t_i+1 -x )^3  + ------( x - t_i )^3  +
-				     6*h_i 				     6*h_i
+					 6*h_i 				     6*h_i
 
-				     [ 	y_i+1	 (z_i+1 * h_i) ]
+					 [ 	y_i+1	 (z_i+1 * h_i) ]
 				   + | 	-----  -  -----------  |( x - t_i ) +
 					 [   h_i  		   6       ]
 
 					 [ 	 y_i	 (z_i * h_i) ]
-			  	   + | 	-----  - ----------- |( t_i+1 - x )
+				   + | 	-----  - ----------- |( t_i+1 - x )
 					 [   h_i  		  6      ]
 
 	:param t: numpy array of n+1 values
@@ -858,7 +876,7 @@ if __name__ == '__main__':
 		fig, axarr = plt.subplots(1,2)
 
 		ftitle = '$f(z)$'
-		stitle = '$S(z)$'
+		stitle = cs.latex_error_title()
 
 		# plot evaluations at nodes using scatter
 		axarr[0].scatter(t,f(t),s=10,color='r', zorder=2)
@@ -871,7 +889,7 @@ if __name__ == '__main__':
 		axarr[0].set_xlabel('x')
 		axarr[0].set_ylabel('y')
 
-		s_error_title = '$ | f(z) - S(z) | $'
+		s_error_title = cs.latex_error_title()
 
 		splot_error = axarr[1].plot(xs, abs(f(xs)-cs(xs)), 'b--', label=s_error_title)
 
@@ -881,6 +899,7 @@ if __name__ == '__main__':
 
 
 		leg = axarr[0].legend(loc='upper center', shadow=True)
+		leg = axarr[1].legend(loc='upper center', shadow=True)
 
 
 	plt.show()
