@@ -510,6 +510,19 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 	# second to last element in r:
 	r[n-1] = v(n-1)
 
+	"""
+	# fill in equations for intererior nodes rows 1->n-1
+	for i in range(1,n):
+
+		# fill tridagonal system
+		A[i, i-1] = h(i-1)
+		A[i, i] = u(i)
+		A[i, i+1] = h(i)
+
+		# fill result vector neglecting first 2 and last 2 elements
+		r[i] = v(i)
+	"""
+
 	# A row n:   [0, ..., 1]
 	A[n,n] = 1
 
@@ -600,15 +613,10 @@ if __name__ == '__main__':
 
 	# general parameters
 	L = 3.0
-	n = 5
-	#t = np.linspace(-L, L, num=n+1)
-	tk = lambda k: -L + (k*6)/n
-	t = np.array([tk(k) for k in range(n+1)])
-
-	# tmp***
-	print(t[0])
-	print(t[-1])
-
+	n = 41
+	#tk = lambda k: -L + (k*6)/n
+	#t = np.array([tk(k) for k in range(n)])
+	t = np.linspace(-L, L, num=n)
 
 	y = f(t)
 	alpha = df(t[0])
@@ -621,12 +629,11 @@ if __name__ == '__main__':
 		interpolated_y = cubic_spline_evaluate(t,y,z,x)
 		interpolation_ys.append(interpolated_y)
 
-	xs = np.linspace(-L, L, 201)     # evaluation points
+	xs = np.linspace(-L, L, 400)     # evaluation points
 	yhats = []
 	for x in xs:
 		yhat = cubic_spline_evaluate(t,y,z,x)
 		yhats.append(yhat)
-
 
 	# generate comparison plots
 	fig, axarr = plt.subplots(1,2)
@@ -646,4 +653,6 @@ if __name__ == '__main__':
 
 	leg = axarr[0].legend(loc='upper center', shadow=True)
 
+
 	plt.show()
+
