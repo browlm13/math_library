@@ -519,28 +519,38 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 	# solve system for coefficients, z
 	z = np.linalg.solve(A, r)
 
-	print(t)
-	print(y)
+	# tmp***
 	print(A)
-	print(r)
-	print(z)
 
 	return z
 
 def cubic_spline_evaluate(t, y, z, x):
 	"""
 
-			     z_i 			        z_i+1
-	S_i(x) =  + ------( t_i+1 -x )^3  + ------( x - t_i )^3  +
-			     6*h_i 				     6*h_i
+				{  
+				   S_0( x )   	for x in [t_0, t_1),
+			       S_1( x )   	for x in [t_1, t_2),
 
-			     [ 	y_i+1	 (z_i+1 * h_i) ]
-			   + | 	-----  -  -----------  |( x - t_i ) +
-				 [   h_i  		   6       ]
+	S( x ) =	   .
+			 	   .
+				   .
 
-				 [ 	 y_i	 (z_i * h_i) ]
-		  	   + | 	-----  - ----------- |( t_i+1 - x )
-				 [   h_i  		  6      ]
+				   S_n-1( x ) 	for x in [t_n-1, t_n]  
+				}
+
+	where S_i is defined,
+
+				     z_i 			        z_i+1
+		S_i(x) =  + ------( t_i+1 -x )^3  + ------( x - t_i )^3  +
+				     6*h_i 				     6*h_i
+
+				     [ 	y_i+1	 (z_i+1 * h_i) ]
+				   + | 	-----  -  -----------  |( x - t_i ) +
+					 [   h_i  		   6       ]
+
+					 [ 	 y_i	 (z_i * h_i) ]
+			  	   + | 	-----  - ----------- |( t_i+1 - x )
+					 [   h_i  		  6      ]
 
 
 	"""
@@ -551,9 +561,6 @@ def cubic_spline_evaluate(t, y, z, x):
 	# useful interval width function takes interval indexs as parameter
 	h = lambda i: t[i+1] - t[i]
 
-	# evalutation method given interval and x value
-	#S = lambda i,x: (z[i]/(6*h(i))) * (t[i+1] - x)**3 + (z[i+1]/(6*h(i))) * (x - t[i])**3 + ((y[i+1]/h(i)) - (z[i+1]*h(i)/6)) * (x - t[i]) + ((y[i]/h(i)) - (z[i]*h(i)/6))*(t[i+1] - x)
-	
 	# evalutation method given interval and x value
 	def S(i,x):
 
@@ -566,8 +573,7 @@ def cubic_spline_evaluate(t, y, z, x):
 
 	# evaluate using polynomial in correct interval
 	for i in range(0, n):
-		if x < t[i]: 
-			return S(i,x)
+		if x <= t[i]: return S(i,x)
 	return S(n-1, x)
 
 
@@ -594,8 +600,16 @@ if __name__ == '__main__':
 
 	# general parameters
 	L = 3.0
-	n = 11
-	t = np.linspace(-L, L, num=n+1)
+	n = 5
+	#t = np.linspace(-L, L, num=n+1)
+	tk = lambda k: -L + (k*6)/n
+	t = np.array([tk(k) for k in range(n+1)])
+
+	# tmp***
+	print(t[0])
+	print(t[-1])
+
+
 	y = f(t)
 	alpha = df(t[0])
 	beta = ddf(t[-1])
@@ -632,6 +646,4 @@ if __name__ == '__main__':
 
 	leg = axarr[0].legend(loc='upper center', shadow=True)
 
-
 	plt.show()
-
