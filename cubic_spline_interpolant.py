@@ -519,6 +519,8 @@ def cubic_spline_coefficients(t, y, alpha, beta):
 	# solve system for coefficients, z
 	z = np.linalg.solve(A, r)
 
+	print(t)
+	print(y)
 	print(A)
 	print(r)
 	print(z)
@@ -563,8 +565,9 @@ def cubic_spline_evaluate(t, y, z, x):
 		return term1 + term2 + term3 + term4
 
 	# evaluate using polynomial in correct interval
-	for i in range(0, n-1):
-		if x <= t[i]: return S(i,x)
+	for i in range(0, n):
+		if x < t[i]: 
+			return S(i,x)
 	return S(n-1, x)
 
 
@@ -590,7 +593,7 @@ if __name__ == '__main__':
 	ddf = lambda t: ( 4*( -12*(t**4) +1 ) )/( 4*(t**4) +1 )
 
 	# general parameters
-	L = -3.0
+	L = 3.0
 	n = 11
 	t = np.linspace(-L, L, num=n+1)
 	y = f(t)
@@ -601,12 +604,15 @@ if __name__ == '__main__':
 
 	interpolation_ys = []
 	for x in t:
-		interpolation_ys.append(cubic_spline_evaluate(t,y,z,x))
+		interpolated_y = cubic_spline_evaluate(t,y,z,x)
+		interpolation_ys.append(interpolated_y)
 
 	xs = np.linspace(-L, L, 201)     # evaluation points
-	answers = []
+	yhats = []
 	for x in xs:
-		answers.append(cubic_spline_evaluate(t,y,z,x))
+		yhat = cubic_spline_evaluate(t,y,z,x)
+		yhats.append(yhat)
+
 
 	# generate comparison plots
 	fig, axarr = plt.subplots(1,2)
@@ -619,7 +625,7 @@ if __name__ == '__main__':
 	axarr[0].scatter(t,interpolation_ys,s=10,color='g', zorder=2)
 
 	fplot = axarr[0].plot(xs, f(xs), 'r-', label=ftitle)
-	lplot = axarr[0].plot(xs, answers, 'g--', label=stitle)
+	lplot = axarr[0].plot(xs, yhats, 'g--', label=stitle)
 
 	axarr[0].set_xlabel('x')
 	axarr[0].set_ylabel('y')
@@ -628,3 +634,4 @@ if __name__ == '__main__':
 
 
 	plt.show()
+
