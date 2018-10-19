@@ -70,10 +70,11 @@ test_functions = [test_function_1_params]
 L = 3.0
 domain = (-L, L)
 polynomial_knots = [ 41, 21, 11, 5]
-evaluation_xs = np.linspace(-L, L, num=400)
+evaluation_xs = np.linspace(-L, L, num=800)
 
 interpolation_methods = {
 	
+
 	'lagrange' : {
 					'InterpolantClass' : LagrangeInterpolatingPolynomial,
 					'params' : lambda node_xs, f : dict(t=node_xs, y=f(node_xs)),
@@ -153,7 +154,6 @@ if __name__ == "__main__":
 	for i, function_params in enumerate(test_functions):
 
 		f = Function(function_params)
-		#f, df, ddf = func.get_derivatives()
 
 		fig, axarr = plt.subplots(len(polynomial_knots),2)
 
@@ -170,7 +170,7 @@ if __name__ == "__main__":
 
 
 			for method_name in interpolation_methods.keys():
-				
+
 				InterpolantClass = interpolation_methods[method_name]['InterpolantClass']
 
 
@@ -195,12 +195,15 @@ if __name__ == "__main__":
 
 				# plot line graph
 				iplot = axarr[i,0].plot(evaluation_xs, interpolant(evaluation_xs),  color=color, linestyle='--', label=interpolant.latex_title)
-				
+				axarr[i,0].grid()
+
 				#
 				# Error Plots
 				#
 
-				iplot_error = axarr[i,1].plot(evaluation_xs, abs(f(evaluation_xs)-interpolant(evaluation_xs)), color=color, linestyle='-', label=interpolant.latex_error_title)
+				#iplot_error = axarr[i,1].plot(evaluation_xs, abs(f(evaluation_xs)-interpolant(evaluation_xs)), color=color, linestyle='-', label=interpolant.latex_error_title)
+				iplot_error = axarr[i,1].semilogy(evaluation_xs, abs(f(evaluation_xs)-interpolant(evaluation_xs)), color=color, linestyle='-', label=interpolant.latex_error_title)
+				axarr[i,1].grid(True)
 
 		#
 		# log analysis

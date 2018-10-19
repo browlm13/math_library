@@ -524,14 +524,14 @@ class CubicSpline:
 
 	"""
 
-	def __init__(self, t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
+	def __init__(self, t, y, start_bc=(2, 0.0), end_bc=(2, 0.0), scipy_system=True):
 		self.t = t
 		self.y = y 
 		self.start_bc = start_bc
 		self.end_bc = end_bc
 
 		# calculate coefficients
-		self.z = cubic_spline_coefficients_bc(self.t, self.y, start_bc=self.start_bc, end_bc=self.end_bc)
+		self.z = cubic_spline_coefficients_bc(self.t, self.y, start_bc=self.start_bc, end_bc=self.end_bc, scipy_system=scipy_system)
 
 		n = len(self.t)
 		self.degree = n
@@ -558,7 +558,7 @@ class CubicSpline:
 		return error_title
 
 
-def cubic_spline_coefficients_bc(t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
+def cubic_spline_coefficients_bc(t, y, start_bc=(2, 0.0), end_bc=(2, 0.0), scipy_system=True):
 	"""
 		Determine coeffiencients, z, of cubic spline. Takes nodes (t, f(t)) ~ where f(t) = y.
 
@@ -674,17 +674,45 @@ def cubic_spline_coefficients_bc(t, y, start_bc=(2, 0.0), end_bc=(2, 0.0)):
 	#
 	# interior nodes system
 	#
+	
+	if scipy_system:
 
-	# fill in equations for intererior nodes rows 1->n-1
-	for i in range(1,n):
+		# fill in equations for intererior nodes rows 1->n-1
+		for i in range(1,n):
 
-		# fill tridagonal system
-		A[i, i-1] = h(i-1)
-		A[i, i] = u(i)
-		A[i, i+1] = h(i)
+			# fill tridagonal system
+			A[i, i-1] = h(i-1)
+			A[i, i] = u(i)
+			A[i, i+1] = h(i)
 
-		# fill result vector neglecting first 2 and last 2 elements
-		r[i] = v(i)
+			# fill result vector neglecting first 2 and last 2 elements
+			r[i] = v(i)
+
+	else:
+		# use system of equation from lecture notes 
+
+		# A row 1:   [0, u1, h1, 0, ..., 0]
+		A[1,1], A[1,2] = u(1), h(1)
+
+		# r second element:
+		r[1] = v(1)
+
+		# fill in equations for intererior nodes rows 2->n-2
+		for i in range(2,n-1):
+
+			# fill tridagonal system
+			A[i, i-1] = h(i-1)
+			A[i, i] = u(i)
+			A[i, i+1] = h(i)
+
+			# fill result vector neglecting first 2 and last 2 elements
+			r[i] = v(i)
+
+		# A row n-1: [0, ..., hn-2, un-1, 0]
+		A[n-1,n-2], A[n-1,n-1] = h(n-2), u(n-1)
+
+		# second to last element in r:
+		r[n-1] = v(n-1)
 	
 	#
 	# ending boundry conditions
@@ -852,10 +880,10 @@ if __name__ == '__main__':
 	L = 3.0 # range (-L, L) for nodes
 	nvals = [ 41, 21, 11, 5] # number of nodes
 
-	for n in nvals:
+	for n in reversed(nvals):
 
 		# generate nodes
-		t = np.linspace(-L, L, num=n)
+		t = np.linspace(-L, L, num=n, endpoint=True)
 		y = f(t)
 
 		# boundry conditions from HW problem 3
@@ -866,7 +894,7 @@ if __name__ == '__main__':
 		cs = CubicSpline(t, y, start_bc=(1,alpha), end_bc=(2,beta))
 
 		# evaluation points to test cubic spline after construction
-		xs = np.linspace(-L, L, 400)
+		xs = np.linspace(-L, L, num=400, endpoint=True)
 
 		#
 		# plot results
@@ -876,7 +904,6 @@ if __name__ == '__main__':
 		fig, axarr = plt.subplots(1,2)
 
 		ftitle = '$f(z)$'
-		stitle = cs.latex_error_title()
 
 		# plot evaluations at nodes using scatter
 		axarr[0].scatter(t,f(t),s=10,color='r', zorder=2)
@@ -884,23 +911,23 @@ if __name__ == '__main__':
 
 		# plot function graphs
 		fplot = axarr[0].plot(xs, f(xs), 'r-', label=ftitle)
-		splot = axarr[0].plot(xs, cs(xs) , 'b--', label=stitle)
+		splot = axarr[0].plot(xs, cs(xs) , 'b--', label=cs.latex_error_title)
 
 		axarr[0].set_xlabel('x')
-		axarr[0].set_ylabel('y')
+		axarr[0].set_ylabel('$f(x), S(x)$')
+		axarr[0].set_title('$Knots_{' + str(n) + '}$')
+		axarr[0].grid()
+		leg = axarr[0].legend(loc='upper center', shadow=True)
 
-		s_error_title = cs.latex_error_title()
-
-		splot_error = axarr[1].plot(xs, abs(f(xs)-cs(xs)), 'b--', label=s_error_title)
+		#splot_error = axarr[1].plot(xs, abs(f(xs)-cs(xs)), 'b--', label=s_error_title)
+		splot_error = axarr[1].semilogy(xs, abs(f(xs)-cs(xs)), 'b--', label=cs.latex_error_title)
 
 		axarr[1].set_xlabel('x')
-		axarr[1].set_ylabel('y')
-		axarr[1].set_title('Problem 1: $E_{' + str(n) + '}$')
-
-
-		leg = axarr[0].legend(loc='upper center', shadow=True)
+		axarr[1].set_ylabel('$|f(x) - S(x)|$')
+		axarr[1].set_title('$Error_{' + str(n) + '}$')
+		axarr[1].grid()
+		axarr[1].set_xlim(-L-1, L+1)
 		leg = axarr[1].legend(loc='upper center', shadow=True)
-
 
 	plt.show()
 
