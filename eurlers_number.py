@@ -83,16 +83,18 @@ def brothers(n):
 	return np.sum(ts)
 
 
-def p8(n):
+def p8(nevals):
+	n = 2*nevals
 	ts = np.array([(i + 2)/math.factorial(i + 1) for i in range(0,n+1,2) ])
 	return np.sum(ts)
 
 
 # continue combining terms in newtons method (combining 3 terms)
-def p9(n):
-
+def p9(nevals):
+	n = 3*nevals
 	ts = np.array([(i**2 + 4*i + 5)/math.factorial(i + 2) for i in range(0,n+1,3) ])
 	return np.sum(ts)
+	
 
 # check
 #for i in range(171):
