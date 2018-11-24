@@ -58,8 +58,13 @@ def p4(n):
 
 	return t
 
+def p5(n):
+
+	ts = np.array([comb(n,i)/n**i for i in range(n+1)])
+	return np.sum(ts)
+
 
 # check
 for i in range(171):
-	print("P(%s) = %s" % (i, p4(i)))
+	print("P(%s) = %s" % (i, p5(i)))
 
