@@ -78,9 +78,13 @@ def p7(n):
 	return np.sum(ts)
 
 # brothers' formulae
-def p8(n):
-
+def brothers(n):
 	ts = np.array([(2*i + 2)/math.factorial(2*i + 1) for i in range(n+1) ])
+	return np.sum(ts)
+
+
+def p8(n):
+	ts = np.array([(i + 2)/math.factorial(i + 1) for i in range(0,n+1,2) ])
 	return np.sum(ts)
 
 
@@ -95,11 +99,11 @@ def p9(n):
 #	print("P(%s) = %s" % (i, p9(i)))
 
 eTrue = 2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427427466391932003059921817413596629043572900334295260
-for i in range(10):
+for i in range(16):
 
 	err8 = abs(p8(i)- eTrue)
 	err9 = abs(p9(i) - eTrue)
 
-	print("i = %s,  err8 = %s,  err9 = %s" % (i, err8, err9)) 
+	print("\ni = %s,  err8 = %s,  err9 = %s" % (i, err8, err9)) 
 	print("i = %s,  err8 - err9 = %s" % (i, err8-err9))
 
