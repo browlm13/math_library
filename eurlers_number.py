@@ -63,8 +63,20 @@ def p5(n):
 	ts = np.array([comb(n,i)/n**i for i in range(n+1)])
 	return np.sum(ts)
 
+def p6(n):
+
+	t1 = np.array([comb(n,i) for i in range(n+1)])
+	t2 = np.array([n**i for i in range(n+1)])
+
+	return np.sum(np.divide(t1,t2))
+
+def p7(n):
+
+	ts = np.array([1/math.factorial(i) for i in range(n+1)])
+
+	return np.sum(ts)
 
 # check
 for i in range(171):
-	print("P(%s) = %s" % (i, p5(i)))
+	print("P(%s) = %s" % (i, p7(i)))
 
