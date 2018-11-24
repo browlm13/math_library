@@ -70,13 +70,20 @@ def p6(n):
 
 	return np.sum(np.divide(t1,t2))
 
+# newton's series Expansion for e
 def p7(n):
 
 	ts = np.array([1/math.factorial(i) for i in range(n+1)])
 
 	return np.sum(ts)
 
+# brothers' formulae
+def p8(n):
+
+	ts = np.array([(2*i + 2)/math.factorial(2*i + 1) for i in range(n+1) ])
+	return np.sum(ts)
+
 # check
 for i in range(171):
-	print("P(%s) = %s" % (i, p7(i)))
+	print("P(%s) = %s" % (i, p8(i)))
 
